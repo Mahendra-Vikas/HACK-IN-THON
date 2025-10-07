@@ -10,6 +10,8 @@ import {
   deleteChatSession
 } from '../utils/chatHistory';
 import { doraEngine, detectUserIntent, getModeIcon, getModeLabel, getModeColor } from '../utils/doraEngine';
+import { processEnhancedMessage, analyzeUserIntent } from '../utils/contextDetection';
+import { campusNavigator } from '../utils/campusNavigator';
 
 // API base URL (fallback for server integration)
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
@@ -183,61 +185,128 @@ export const useChatStore = create(
         set({ currentSession: updatedSession });
       },
       
-      // Send message to DORA AI with smart context switching
+      // Enhanced Send message with AI-Powered Campus Navigation
       sendMessage: async (content) => {
         const { addMessage } = get();
         
-        // Detect user intent and mode
-        const intent = detectUserIntent(content);
-        const detectedMode = intent.mode;
+        console.log('🚀 DORA Enhanced: Processing message:', content);
         
-        // Add user message with detected mode
+        // Enhanced context detection
+        const enhancedResult = await processEnhancedMessage(content, { useAI: true });
+        console.log('🧠 Enhanced analysis result:', enhancedResult);
+        
+        // Add user message with enhanced context
         addMessage({
           role: 'user',
           content,
-          mode: detectedMode,
-          confidence: intent.confidence
+          mode: enhancedResult.intent?.primaryContext || 'general',
+          confidence: enhancedResult.intent?.confidence || 0
         });
         
-        // Update current mode based on detection
+        // Update current mode based on enhanced detection
         set({ 
           isLoading: true,
-          currentMode: detectedMode 
+          currentMode: enhancedResult.intent?.primaryContext || 'general'
         });
         
         try {
-          // Check if DORA can handle this directly (campus queries)
-          const doraResponse = await doraEngine.generateResponse(content, intent);
-          
-          if (doraResponse.mode === 'campus' && doraResponse.response) {
-            // DORA handled the campus query directly
-            addMessage({
-              role: 'assistant',
-              content: doraResponse.response,
-              mode: 'campus',
-              confidence: doraResponse.confidence,
-              source: doraResponse.source
-            });
-            
-            set({ isLoading: false });
-            return;
+          // Handle different response types from enhanced processing
+          switch (enhancedResult.type) {
+            case 'campus_local':
+              // Local campus data found - immediate response
+              console.log('🏫 Local campus response:', enhancedResult.message);
+              addMessage({
+                role: 'assistant',
+                content: enhancedResult.message,
+                mode: 'campus',
+                confidence: enhancedResult.intent?.confidence || 0.8,
+                source: 'local_campus_data'
+              });
+              set({ isLoading: false });
+              return;
+              
+            case 'campus_ai_enhanced':
+              // Use AI with campus context for enhanced response
+              console.log('🤖 AI-enhanced campus response needed');
+              await get().sendToGeminiAI(enhancedResult.prompt, 'campus', enhancedResult.intent, {
+                isEnhanced: true,
+                localMatches: enhancedResult.localMatches,
+                fallback: enhancedResult.fallbackResponse
+              });
+              return;
+              
+            case 'campus_loading':
+              // Campus data still loading
+              addMessage({
+                role: 'assistant',
+                content: enhancedResult.message,
+                mode: 'campus',
+                isLoading: true
+              });
+              set({ isLoading: false });
+              return;
+              
+            case 'volunteer':
+              // Enhanced volunteer query
+              await get().sendToGeminiAI(enhancedResult.enhancedPrompt, 'volunteer', enhancedResult.intent);
+              return;
+              
+            case 'general':
+              // General DORA query - try legacy system first
+              const legacyIntent = detectUserIntent(content);
+              const doraResponse = await doraEngine.generateResponse(content, legacyIntent);
+              
+              if (doraResponse.mode === 'campus' && doraResponse.response) {
+                addMessage({
+                  role: 'assistant',
+                  content: doraResponse.response,
+                  mode: 'campus',
+                  confidence: doraResponse.confidence,
+                  source: doraResponse.source
+                });
+                set({ isLoading: false });
+                return;
+              }
+              
+              // Use standard Gemini AI processing
+              await get().sendToGeminiAI(content, legacyIntent.mode, legacyIntent);
+              return;
+              
+            case 'error':
+            default:
+              // Error handling
+              addMessage({
+                role: 'assistant',
+                content: enhancedResult.message || "🤖 I encountered an issue processing your request. Please try again.",
+                mode: 'general',
+                isError: true
+              });
+              set({ isLoading: false });
+              return;
           }
           
-          // For volunteer queries or if campus data isn't available, use Gemini AI
-          await get().sendToGeminiAI(content, detectedMode, intent);
-          
         } catch (error) {
-          console.error('DORA processing error:', error);
+          console.error('🚨 Enhanced DORA processing error:', error);
           
-          // Fallback response
-          const fallbackResponse = detectedMode === 'campus' 
-            ? "🏫 I'm having trouble accessing campus information right now. Please try asking about buildings, departments, or facilities again in a moment!"
-            : "🙋‍♀️ I'm having connectivity issues but I'm still here to help with volunteer opportunities! You can check the events panel or ask me about specific volunteer programs.";
+          // Enhanced fallback response based on detected context
+          let fallbackResponse;
+          const context = enhancedResult.intent?.primaryContext || 'general';
+          
+          switch (context) {
+            case 'campus':
+              fallbackResponse = "🏫 I'm having trouble accessing campus navigation data right now. Here's what I can help with:\n\n• Building locations and directions\n• Department and facility information\n• Campus accessibility details\n\nPlease try asking about a specific location again, or check if you have an internet connection.";
+              break;
+            case 'volunteer':
+              fallbackResponse = "🙋‍♀️ I'm experiencing connectivity issues with volunteer data. However, I can still help with:\n\n• General volunteer opportunities\n• Event planning guidance\n• Community service ideas\n\nPlease try your volunteer question again in a moment!";
+              break;
+            default:
+              fallbackResponse = "🤖 I'm having technical difficulties but I'm still here to help! You can:\n\n🏫 Ask about campus locations and directions\n🙋‍♀️ Inquire about volunteer opportunities\n💡 Try rephrasing your question\n\nWhat would you like to know?";
+          }
           
           addMessage({
             role: 'assistant',
             content: fallbackResponse,
-            mode: detectedMode,
+            mode: context,
             isError: true,
           });
           
@@ -245,20 +314,28 @@ export const useChatStore = create(
         }
       },
       
-      // Enhanced Gemini AI integration with DORA context and comprehensive debugging
-      sendToGeminiAI: async (content, mode, intent) => {
+      // Enhanced Gemini AI integration with campus navigation and comprehensive debugging
+      sendToGeminiAI: async (prompt, mode, intent, options = {}) => {
         const { addMessage } = get();
         
         try {
-          console.log('🚀 DORA: Starting sendToGeminiAI process');
-          console.log('📝 User content:', content);
+          console.log('🚀 DORA Enhanced: Starting sendToGeminiAI process');
+          console.log('📝 Prompt content:', typeof prompt === 'string' ? prompt.substring(0, 200) + '...' : prompt);
           console.log('🎯 Mode:', mode);
           console.log('🧠 Intent:', intent);
+          console.log('⚙️ Options:', options);
           
-          // Prepare context based on detected mode
+          // Determine if this is an enhanced prompt or regular content
+          const isEnhancedPrompt = options.isEnhanced || typeof prompt === 'string' && prompt.includes('USER QUERY:');
+          const actualContent = isEnhancedPrompt ? prompt : prompt;
+          
+          // Prepare context based on detected mode and enhancement status
           let systemPrompt = `You are DORA (Digital Outreach & Resource Assistant) for Sri Eshwar College of Engineering. `;
           
-          if (mode === 'campus') {
+          if (isEnhancedPrompt) {
+            // For enhanced prompts, the context is already included
+            systemPrompt = '';
+          } else if (mode === 'campus') {
             systemPrompt += `You are currently in Campus Navigator mode 🏫. Help users with campus locations, directions, and facilities. `;
             systemPrompt += `If you don't have specific campus data, provide general helpful guidance about navigating a college campus. `;
             systemPrompt += `Always include the 🏫 emoji and mention "Campus Navigator Mode" in your responses.`;
@@ -268,8 +345,11 @@ export const useChatStore = create(
             systemPrompt += `Always include the 🙋‍♀️ emoji and mention "Volunteer Hub Mode" in your responses.`;
           }
           
-          systemPrompt += `\n\nUser's detected intent keywords: ${intent.keywords.join(', ') || 'general query'}`;
-          systemPrompt += `\nConfidence level: ${intent.confidence}/5`;
+          if (!isEnhancedPrompt && intent) {
+            systemPrompt += `\n\nUser's detected intent keywords: ${intent.keywords?.join(', ') || intent.specialPatterns?.join(', ') || 'general query'}`;
+            systemPrompt += `\nConfidence level: ${intent.confidence || 'medium'}`;
+          }
+          
           systemPrompt += `\n\nProvide helpful, friendly, and informative responses. Keep responses concise but comprehensive.`;
           
           // Enhanced API key validation
@@ -314,7 +394,7 @@ export const useChatStore = create(
           const requestBody = {
             contents: [{
               parts: [{
-                text: `${systemPrompt}\n\nUser query: ${content}`
+                text: isEnhancedPrompt ? actualContent : `${systemPrompt}\n\nUser query: ${actualContent}`
               }]
             }],
             generationConfig: {
