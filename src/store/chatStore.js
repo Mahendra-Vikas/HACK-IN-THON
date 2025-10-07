@@ -14,8 +14,16 @@ import { doraEngine, detectUserIntent, getModeIcon, getModeLabel, getModeColor }
 // API base URL (fallback for server integration)
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
-// Gemini AI API Key
-const GEMINI_API_KEY = 'AIzaSyDjwsRlPhNh5gGhOE2NTMJ7TqhtqtyVb58';
+// Gemini AI API Key - Read from environment variable with multiple fallbacks
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDm0TqiDui3FB9xZ_0ftfbgMSTeEOGS1rw';
+
+// Debug API key loading
+console.log('🔧 Environment check:', {
+  'VITE_GEMINI_API_KEY': import.meta.env.VITE_GEMINI_API_KEY ? 'Found' : 'Missing',
+  'API_KEY_LENGTH': GEMINI_API_KEY ? GEMINI_API_KEY.length : 0,
+  'NODE_ENV': import.meta.env.NODE_ENV,
+  'MODE': import.meta.env.MODE
+});
 
 // Enhanced Chat Store with DORA Intelligence and localStorage JSON as primary storage
 export const useChatStore = create(
@@ -237,11 +245,16 @@ export const useChatStore = create(
         }
       },
       
-      // Enhanced Gemini AI integration with DORA context
+      // Enhanced Gemini AI integration with DORA context and comprehensive debugging
       sendToGeminiAI: async (content, mode, intent) => {
         const { addMessage } = get();
         
         try {
+          console.log('🚀 DORA: Starting sendToGeminiAI process');
+          console.log('📝 User content:', content);
+          console.log('🎯 Mode:', mode);
+          console.log('🧠 Intent:', intent);
+          
           // Prepare context based on detected mode
           let systemPrompt = `You are DORA (Digital Outreach & Resource Assistant) for Sri Eshwar College of Engineering. `;
           
@@ -259,51 +272,210 @@ export const useChatStore = create(
           systemPrompt += `\nConfidence level: ${intent.confidence}/5`;
           systemPrompt += `\n\nProvide helpful, friendly, and informative responses. Keep responses concise but comprehensive.`;
           
-          // Call Gemini AI
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+          // Enhanced API key validation
+          console.log('🔑 Validating Gemini API key...');
+          console.log('🔑 API Key check:', GEMINI_API_KEY ? `Present (${GEMINI_API_KEY.substring(0, 10)}...)` : 'MISSING');
+          console.log('🔑 API Key length:', GEMINI_API_KEY ? GEMINI_API_KEY.length : 0);
+          console.log('🔑 API Key prefix check:', GEMINI_API_KEY ? GEMINI_API_KEY.startsWith('AIza') : false);
+          
+          if (!GEMINI_API_KEY) {
+            throw new Error('Gemini API key is not configured. Please check your .env.local file.');
+          }
+
+          if (!GEMINI_API_KEY.startsWith('AIza')) {
+            throw new Error('Invalid Gemini API key format. Key should start with "AIza".');
+          }
+
+          if (GEMINI_API_KEY.length < 30) {
+            throw new Error('Gemini API key appears to be incomplete or invalid.');
+          }
+
+          console.log('✅ API key validation passed');
+          
+          // Test network connectivity first
+          console.log('🌐 Testing network connectivity...');
+          try {
+            const connectivityTest = await fetch('https://www.google.com/robots.txt', {
+              method: 'HEAD',
+              mode: 'no-cors',
+              cache: 'no-cache'
+            });
+            console.log('✅ Network connectivity test passed');
+          } catch (connectError) {
+            console.warn('⚠️ Network connectivity test failed:', connectError.message);
+          }
+          
+          // Use the latest Gemini 2.0 Flash model
+          const baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+          const apiUrl = `${baseUrl}?key=${GEMINI_API_KEY}`;
+          console.log('🌐 API Base URL:', baseUrl);
+          console.log('🌐 Full URL (with key):', `${baseUrl}?key=${GEMINI_API_KEY.substring(0, 10)}...`);
+          
+          const requestBody = {
+            contents: [{
+              parts: [{
+                text: `${systemPrompt}\n\nUser query: ${content}`
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
+            },
+            safetySettings: [
+              {
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_HATE_SPEECH",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              }
+            ]
+          };
+          
+          console.log('📤 Request body size:', JSON.stringify(requestBody).length, 'bytes');
+          console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
+          
+          // Make API request with detailed logging
+          console.log('📡 Sending request to Gemini API...');
+          const startTime = Date.now();
+          
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': 'DORA/1.0.0'
             },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: `${systemPrompt}\n\nUser query: ${content}`
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 1024,
-              }
-            }),
+            body: JSON.stringify(requestBody),
           });
           
+          const responseTime = Date.now() - startTime;
+          console.log(`📨 Response received in ${responseTime}ms`);
+          console.log('� Response status:', response.status, response.statusText);
+          console.log('� Response headers:', Object.fromEntries(response.headers.entries()));
+          
+          // Read response body
+          const responseText = await response.text();
+          console.log('📨 Raw response body:', responseText);
+          
           if (!response.ok) {
-            throw new Error(`Gemini API error: ${response.status}`);
+            console.error('❌ API Error Response:', responseText);
+            let errorDetail = '';
+            try {
+              const errorData = JSON.parse(responseText);
+              errorDetail = errorData.error?.message || errorData.message || 'Unknown API error';
+            } catch (e) {
+              errorDetail = responseText;
+            }
+            throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorDetail}`);
           }
           
-          const data = await response.json();
-          const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          // Parse response
+          let data;
+          try {
+            data = JSON.parse(responseText);
+            console.log('📥 Parsed API response:', JSON.stringify(data, null, 2));
+          } catch (parseError) {
+            console.error('❌ Failed to parse API response:', parseError);
+            throw new Error(`Invalid JSON response from API: ${parseError.message}`);
+          }
+          
+          // Validate response structure with detailed logging
+          if (!data) {
+            throw new Error('Empty response from Gemini API');
+          }
+
+          if (!data.candidates) {
+            console.error('❌ No candidates in response:', data);
+            throw new Error('No candidates in API response');
+          }
+
+          if (!Array.isArray(data.candidates) || data.candidates.length === 0) {
+            console.error('❌ Invalid candidates array:', data.candidates);
+            throw new Error('Invalid or empty candidates array');
+          }
+
+          const candidate = data.candidates[0];
+          if (!candidate) {
+            throw new Error('First candidate is null or undefined');
+          }
+
+          if (!candidate.content) {
+            console.error('❌ No content in candidate:', candidate);
+            if (candidate.finishReason) {
+              throw new Error(`Content blocked by safety filter: ${candidate.finishReason}`);
+            }
+            throw new Error('No content in API response candidate');
+          }
+
+          if (!candidate.content.parts || !Array.isArray(candidate.content.parts) || candidate.content.parts.length === 0) {
+            console.error('❌ Invalid content parts:', candidate.content);
+            throw new Error('Invalid content parts in API response');
+          }
+
+          const part = candidate.content.parts[0];
+          if (!part || !part.text) {
+            console.error('❌ No text in content part:', part);
+            throw new Error('No text in API response content part');
+          }
+
+          const aiResponse = part.text;
+          console.log('🤖 AI Reply length:', aiResponse.length, 'characters');
+          console.log('🤖 AI Reply:', aiResponse);
           
           if (aiResponse) {
+            console.log('✅ Message processing complete');
             addMessage({
               role: 'assistant',
               content: aiResponse,
               mode: mode,
               confidence: intent.confidence,
-              source: mode === 'campus' ? 'Campus Navigator (AI)' : 'Volunteer Hub (AI)'
+              source: mode === 'campus' ? 'Campus Navigator (AI)' : 'Volunteer Hub (AI)',
+              responseTime: responseTime
             });
           } else {
             throw new Error('No response from Gemini AI');
           }
           
         } catch (error) {
-          console.error('Gemini AI error:', error);
+          console.error('❌ Gemini AI error:', error);
+          console.error('❌ Error name:', error.name);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error stack:', error.stack);
+          
+          // Enhanced error message based on error type
+          let errorMessage = 'Connection is unstable. Please try again.';
+          let technicalDetails = error.message;
+          
+          if (error.message.includes('API key')) {
+            errorMessage = '🔑 API key configuration error. Please check your settings.';
+          } else if (error.message.includes('fetch') || error.name === 'TypeError') {
+            errorMessage = '🌐 Network connection error. Please check your internet connection.';
+          } else if (error.message.includes('403')) {
+            errorMessage = '🚫 API access denied. Please check your API key permissions.';
+          } else if (error.message.includes('429')) {
+            errorMessage = '⏱️ Rate limit exceeded. Please wait a moment and try again.';
+          } else if (error.message.includes('500')) {
+            errorMessage = '🔧 Server error. Please try again in a few moments.';
+          } else if (error.message.includes('safety filter') || error.message.includes('blocked')) {
+            errorMessage = '🛡️ Content was blocked by safety filters. Please rephrase your message.';
+          } else if (error.message.includes('JSON')) {
+            errorMessage = '📄 Invalid response format from API. Please try again.';
+          }
           
           // Try server fallback
           try {
+            console.log('🔄 Attempting server fallback...');
             const response = await fetch(`${API_BASE}/chat`, {
               method: 'POST',
               headers: {
@@ -320,6 +492,7 @@ export const useChatStore = create(
             if (response.ok) {
               const data = await response.json();
               if (data.success) {
+                console.log('✅ Server fallback successful');
                 addMessage({
                   role: 'assistant',
                   content: data.response,
@@ -330,10 +503,10 @@ export const useChatStore = create(
               }
             }
           } catch (serverError) {
-            console.error('Server fallback failed:', serverError);
+            console.error('❌ Server fallback failed:', serverError);
           }
           
-          // Final fallback
+          // Final fallback with enhanced error details
           const fallbackMessages = {
             campus: [
               "🏫 I'm having trouble accessing campus information right now. However, I can still help you navigate! Most buildings at SECE are well-marked, and you can ask security or reception for specific directions.",
@@ -352,7 +525,7 @@ export const useChatStore = create(
           
           addMessage({
             role: 'assistant',
-            content: randomMessage,
+            content: `${errorMessage}\n\n${randomMessage}\n\n**Technical Details:**\n${technicalDetails}\n\n**Debug Info:**\n- Time: ${new Date().toISOString()}\n- Mode: ${mode}\n- Browser: ${navigator.userAgent}`,
             mode: mode,
             isError: true,
           });

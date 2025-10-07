@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "id": "user_1",
+      "name": "Demo User",
+      "email": "demo@sece.edu",
+      "password": "demo123",
+      "department": "Computer Science & Engineering",
+      "rollNumber": "21CS001",
+      "year": "Final Year",
+      "createdAt": "2025-10-07T04:00:00.000Z",
+      "lastLogin": "2025-10-07T04:00:00.000Z"
+    }
+  ]
+}

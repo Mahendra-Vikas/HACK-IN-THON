@@ -12,6 +12,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useUIStore } from '../store';
+import UserProfileHeader from './UserProfileHeader';
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode, sidebarOpen, toggleSidebar } = useUIStore();
@@ -117,6 +118,9 @@ const Header = () => {
               DORA Online
             </span>
           </div>
+
+          {/* User Profile */}
+          <UserProfileHeader />
         </div>
       </div>
 

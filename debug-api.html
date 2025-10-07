@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DORA API Debug Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section h2 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log-area {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+        }
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid #F44336;
+        }
+        .status.info {
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid #2196F3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin: 5px 0;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 DORA API Debug Tool</h1>
+        
+        <div class="test-section">
+            <h2>🔑 API Key Configuration</h2>
+            <input type="password" id="apiKey" placeholder="Enter Gemini API Key" value="AIzaSyDm0TqiDui3FB9xZ_0ftfbgMSTeEOGS1rw">
+            <button onclick="validateApiKey()">Validate API Key</button>
+            <div id="keyStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 Network Connectivity</h2>
+            <button onclick="testNetworkConnectivity()">Test Network Connection</button>
+            <div id="networkStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 API Endpoint Testing</h2>
+            <textarea id="testMessage" placeholder="Enter test message" rows="3">Hello DORA! Can you help me find the library on campus?</textarea>
+            <br>
+            <button onclick="testSimpleRequest()">Test Simple Request</button>
+            <button onclick="testCampusMode()">Test Campus Mode</button>
+            <button onclick="testVolunteerMode()">Test Volunteer Mode</button>
+            <div id="apiStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Debug Logs</h2>
+            <button onclick="clearLogs()">Clear Logs</button>
+            <button onclick="exportLogs()">Export Logs</button>
+            <div id="debugLogs" class="log-area"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 DORA Store Testing</h2>
+            <button onclick="testDoraStore()">Test DORA Store Integration</button>
+            <button onclick="simulateChat()">Simulate Chat Message</button>
+            <div id="storeStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            logs.push(logEntry);
+            
+            const logArea = document.getElementById('debugLogs');
+            logArea.textContent += logEntry + '\n';
+            logArea.scrollTop = logArea.scrollHeight;
+            
+            console.log(logEntry);
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('debugLogs').textContent = '';
+            log('Logs cleared');
+        }
+
+        function exportLogs() {
+            const logData = logs.join('\n');
+            const blob = new Blob([logData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dora-debug-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function validateApiKey() {
+            const apiKey = document.getElementById('apiKey').value;
+            
+            if (!apiKey || apiKey.length < 10) {
+                showStatus('keyStatus', 'Invalid API key format', 'error');
+                log('API key validation failed: Invalid format', 'error');
+                return false;
+            }
+
+            if (!apiKey.startsWith('AIza')) {
+                showStatus('keyStatus', 'API key should start with "AIza"', 'error');
+                log('API key validation failed: Wrong prefix', 'error');
+                return false;
+            }
+
+            showStatus('keyStatus', 'API key format looks valid ✓', 'success');
+            log('API key format validation passed', 'success');
+            return true;
+        }
+
+        async function testNetworkConnectivity() {
+            showStatus('networkStatus', 'Testing network connectivity...', 'info');
+            log('Starting network connectivity test');
+
+            try {
+                // Test basic internet connectivity
+                const response = await fetch('https://www.google.com/robots.txt', {
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+                
+                log('Basic internet connectivity: OK', 'success');
+
+                // Test Gemini API endpoint reachability
+                const geminiTest = await fetch('https://generativelanguage.googleapis.com/', {
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+                
+                log('Gemini API endpoint reachable: OK', 'success');
+                showStatus('networkStatus', 'Network connectivity test passed ✓', 'success');
+                
+            } catch (error) {
+                log(`Network connectivity test failed: ${error.message}`, 'error');
+                showStatus('networkStatus', `Network test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGeminiRequest(message, mode = 'general') {
+            const apiKey = document.getElementById('apiKey').value;
+            
+            if (!await validateApiKey()) {
+                return null;
+            }
+
+            log(`Starting Gemini API test (${mode} mode)`, 'info');
+            log(`Test message: "${message}"`, 'info');
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            let systemPrompt = '';
+            if (mode === 'campus') {
+                systemPrompt = 'You are DORA, a campus navigation assistant. Help students find locations, buildings, and navigate the campus.';
+            } else if (mode === 'volunteer') {
+                systemPrompt = 'You are DORA, a volunteer coordination assistant. Help organize volunteers and manage volunteer activities.';
+            } else {
+                systemPrompt = 'You are DORA, a helpful AI assistant.';
+            }
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: `${systemPrompt}\n\nUser: ${message}`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                },
+                safetySettings: [
+                    {
+                        category: "HARM_CATEGORY_HARASSMENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_HATE_SPEECH",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                    }
+                ]
+            };
+
+            log(`API URL: ${url}`, 'info');
+            log(`Request body: ${JSON.stringify(requestBody, null, 2)}`, 'info');
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                log(`Response status: ${response.status} ${response.statusText}`, 'info');
+                log(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'info');
+
+                const responseText = await response.text();
+                log(`Raw response: ${responseText}`, 'info');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${responseText}`);
+                }
+
+                const data = JSON.parse(responseText);
+                log(`Parsed response: ${JSON.stringify(data, null, 2)}`, 'info');
+
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    log(`AI Reply: ${reply}`, 'success');
+                    return { success: true, reply, data };
+                } else {
+                    log('No valid response content found', 'error');
+                    return { success: false, error: 'No valid response content', data };
+                }
+
+            } catch (error) {
+                log(`Gemini API request failed: ${error.message}`, 'error');
+                log(`Error stack: ${error.stack}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testSimpleRequest() {
+            showStatus('apiStatus', 'Testing simple API request...', 'info');
+            const message = document.getElementById('testMessage').value;
+            
+            const result = await testGeminiRequest(message, 'general');
+            
+            if (result && result.success) {
+                showStatus('apiStatus', `✓ Simple request successful! Reply: "${result.reply.substring(0, 100)}..."`, 'success');
+            } else {
+                showStatus('apiStatus', `✗ Simple request failed: ${result?.error || 'Unknown error'}`, 'error');
+            }
+        }
+
+        async function testCampusMode() {
+            showStatus('apiStatus', 'Testing campus mode...', 'info');
+            const message = document.getElementById('testMessage').value;
+            
+            const result = await testGeminiRequest(message, 'campus');
+            
+            if (result && result.success) {
+                showStatus('apiStatus', `✓ Campus mode successful! Reply: "${result.reply.substring(0, 100)}..."`, 'success');
+            } else {
+                showStatus('apiStatus', `✗ Campus mode failed: ${result?.error || 'Unknown error'}`, 'error');
+            }
+        }
+
+        async function testVolunteerMode() {
+            showStatus('apiStatus', 'Testing volunteer mode...', 'info');
+            const message = document.getElementById('testMessage').value;
+            
+            const result = await testGeminiRequest(message, 'volunteer');
+            
+            if (result && result.success) {
+                showStatus('apiStatus', `✓ Volunteer mode successful! Reply: "${result.reply.substring(0, 100)}..."`, 'success');
+            } else {
+                showStatus('apiStatus', `✗ Volunteer mode failed: ${result?.error || 'Unknown error'}`, 'error');
+            }
+        }
+
+        async function testDoraStore() {
+            showStatus('storeStatus', 'Testing DORA store integration...', 'info');
+            log('Testing DORA store integration', 'info');
+
+            try {
+                // Check if we're in the DORA app context
+                if (typeof window !== 'undefined' && window.parent !== window) {
+                    // We're in an iframe or embedded context
+                    log('Running in embedded context - posting message to parent', 'info');
+                    window.parent.postMessage({ 
+                        type: 'DORA_DEBUG_TEST', 
+                        payload: { message: 'Hello from debug tool' } 
+                    }, '*');
+                }
+
+                // Try to access localStorage
+                const testData = { test: true, timestamp: Date.now() };
+                localStorage.setItem('dora-debug-test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('dora-debug-test'));
+                
+                if (retrieved && retrieved.test) {
+                    log('localStorage test passed', 'success');
+                    showStatus('storeStatus', '✓ DORA store integration test passed', 'success');
+                } else {
+                    throw new Error('localStorage test failed');
+                }
+
+            } catch (error) {
+                log(`DORA store test failed: ${error.message}`, 'error');
+                showStatus('storeStatus', `✗ DORA store test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateChat() {
+            showStatus('storeStatus', 'Simulating chat message...', 'info');
+            log('Simulating chat message flow', 'info');
+
+            const testMessage = document.getElementById('testMessage').value || 'Hello DORA!';
+            
+            try {
+                // Simulate the chat flow
+                log(`Simulating user message: "${testMessage}"`, 'info');
+                
+                const result = await testGeminiRequest(testMessage, 'general');
+                
+                if (result && result.success) {
+                    log(`Chat simulation successful - AI responded: "${result.reply.substring(0, 100)}..."`, 'success');
+                    showStatus('storeStatus', '✓ Chat simulation successful', 'success');
+                } else {
+                    log(`Chat simulation failed: ${result?.error || 'Unknown error'}`, 'error');
+                    showStatus('storeStatus', `✗ Chat simulation failed: ${result?.error || 'Unknown error'}`, 'error');
+                }
+
+            } catch (error) {
+                log(`Chat simulation error: ${error.message}`, 'error');
+                showStatus('storeStatus', `✗ Chat simulation error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run initial tests
+        window.addEventListener('load', () => {
+            log('DORA API Debug Tool loaded', 'success');
+            log('Ready to run diagnostics...', 'info');
+            
+            // Auto-validate API key if present
+            setTimeout(() => {
+                if (document.getElementById('apiKey').value) {
+                    validateApiKey();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

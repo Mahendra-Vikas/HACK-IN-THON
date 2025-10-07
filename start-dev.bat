@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Enhanced Volunteer Hub Development Environment...
+echo 🚀 Starting DORA Development Environment...
 echo.
 
 REM Check if Node.js is installed
@@ -16,7 +16,7 @@ node --version
 
 echo.
 echo 📦 Installing dependencies...
-call npm run install-all
+call npm install
 
 if errorlevel 1 (
     echo ❌ Failed to install dependencies
@@ -27,24 +27,30 @@ if errorlevel 1 (
 echo.
 echo ✅ Dependencies installed successfully!
 echo.
-echo 🗄️ Database Setup:
-echo   - MongoDB Atlas (recommended): See MONGODB_SETUP.md
-echo   - Local MongoDB: Install MongoDB locally
-echo   - No database: App will use in-memory storage
+echo 🤖 DORA - Digital Outreach & Resource Assistant
+echo   🏫 Campus Navigator: Find buildings, directions, facilities
+echo   🙋‍♀️ Volunteer Hub: Discover events and opportunities
+echo   🧠 Smart Context Switching: Auto-detects your intent
 echo.
-echo 🚀 Starting development servers...
-echo   - Frontend:     http://localhost:5173
-echo   - Backend API:  http://localhost:3001
-echo   - Health Check: http://localhost:3001/api/health
+echo 🚀 Starting DORA development server...
+echo   - Frontend UI:    http://localhost:5173
+echo   - DORA Chat:      http://localhost:5173
+echo   - Preview Build:  npm run preview
 echo.
-echo 💡 New Features Available:
-echo   ✅ Claude-style chat history with localStorage JSON
-echo   ✅ In-chat event registration 
-echo   ✅ MongoDB persistence + localStorage fallback
-echo   ✅ Enhanced error handling & scrolling fixes
-echo   ✅ Real-time search & export/import functionality
+echo 💡 DORA Features:
+echo   ✅ Smart context switching between campus & volunteer modes
+echo   ✅ Persistent chat history with localStorage
+echo   ✅ Voice input support
+echo   ✅ Dark/Light theme toggle
+echo   ✅ Mobile responsive design
+echo   ✅ Gemini AI powered responses
 echo.
-echo Press Ctrl+C to stop the servers
+echo 🔧 Available Commands:
+echo   - npm run dev      (Start development)
+echo   - npm run build    (Build for production)
+echo   - npm run preview  (Preview production build)
+echo.
+echo Press Ctrl+C to stop the server
 echo.
 
 call npm run dev
