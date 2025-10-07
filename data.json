@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Tree Plantation Drive",
+    "organizer": "Eco Club, SECE",
+    "date": "2025-10-20",
+    "location": "College Entrance Gate",
+    "description": "Join hands to make our campus greener by planting 200 new saplings around the entrance road.",
+    "category": "Environment",
+    "contact": "ecoclub@sece.ac.in"
+  },
+  {
+    "title": "Digital Literacy Workshop",
+    "organizer": "CSE Department Volunteers",
+    "date": "2025-10-22",
+    "location": "Computer Science Lab - Block II",
+    "description": "A hands-on training session to teach basic computer skills to nearby village students.",
+    "category": "Education",
+    "contact": "csevolunteers@sece.ac.in"
+  },
+  {
+    "title": "Campus Clean-Up Challenge",
+    "organizer": "NSS Unit & Clean Campus Committee",
+    "date": "2025-10-25",
+    "location": "Open Air Theatre",
+    "description": "A one-day event where students clean and beautify different zones of the campus.",
+    "category": "Environment",
+    "contact": "nss@sece.ac.in"
+  },
+  {
+    "title": "Blood Donation Camp",
+    "organizer": "NSS Unit, SECE",
+    "date": "2025-10-15",
+    "location": "Open Air Theatre",
+    "description": "A blood donation camp in collaboration with PSG Hospitals.",
+    "category": "Health",
+    "contact": "nss@sece.ac.in"
+  },
+  {
+    "title": "Coding for Kids Initiative",
+    "organizer": "AI & DS Department",
+    "date": "2025-11-01",
+    "location": "AI Department Seminar Hall",
+    "description": "Teach basic coding concepts to school students from nearby government schools.",
+    "category": "Education",
+    "contact": "aidsvolunteers@sece.ac.in"
+  },
+  {
+    "title": "Senior Citizen Care Drive",
+    "organizer": "Rotaract Club of SECE",
+    "date": "2025-11-03",
+    "location": "Sree Ramakrishna Old Age Home, Coimbatore",
+    "description": "A visit to spend quality time with senior citizens and distribute essential kits.",
+    "category": "Community Service",
+    "contact": "rotaract@sece.ac.in"
+  },
+  {
+    "title": "Road Safety Awareness Rally",
+    "organizer": "Automobile Department & NSS",
+    "date": "2025-11-05",
+    "location": "Pollachi Main Road - SECE to Eachanari",
+    "description": "A rally to promote road safety and helmet awareness among the public.",
+    "category": "Awareness",
+    "contact": "autoawareness@sece.ac.in"
+  },
+  {
+    "title": "Health Checkup Camp",
+    "organizer": "Biomedical Department & PSG Hospitals",
+    "date": "2025-11-08",
+    "location": "Amenity Centre",
+    "description": "Free medical checkups for students and nearby residents including BP, sugar, and BMI tests.",
+    "category": "Health",
+    "contact": "biomed@sece.ac.in"
+  },
+  {
+    "title": "Women Empowerment Talk",
+    "organizer": "Women Development Cell (WDC)",
+    "date": "2025-11-10",
+    "location": "Central Atrium",
+    "description": "An inspiring session for women students on career growth, safety, and leadership.",
+    "category": "Social Awareness",
+    "contact": "wdc@sece.ac.in"
+  },
+  {
+    "title": "Tech Support for NGOs",
+    "organizer": "Information Technology Department",
+    "date": "2025-11-15",
+    "location": "IT Block - Innovation Lab",
+    "description": "A technical volunteering event to help local NGOs with website and data management support.",
+    "category": "Technology Assistance",
+    "contact": "itvolunteers@sece.ac.in"
+  }
+]

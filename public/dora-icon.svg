@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <!-- Background Circle -->
+  <circle cx="24" cy="24" r="24" fill="url(#doraGradient)"/>
+  
+  <!-- Brain Icon -->
+  <path d="M18 16c-2.5 0-4.5 2-4.5 4.5 0 1.5.7 2.8 1.8 3.6-.5.8-.8 1.7-.8 2.7 0 2.8 2.2 5 5 5h.2c.9 1.2 2.3 2 3.8 2 1.5 0 2.9-.8 3.8-2h.2c2.8 0 5-2.2 5-5 0-1-.3-1.9-.8-2.7 1.1-.8 1.8-2.1 1.8-3.6 0-2.5-2-4.5-4.5-4.5-.8 0-1.5.2-2.1.6-.6-.4-1.3-.6-2.1-.6-.8 0-1.5.2-2.1.6-.6-.4-1.3-.6-2.1-.6z" fill="white" opacity="0.9"/>
+  
+  <!-- Sparkle Effects -->
+  <circle cx="14" cy="18" r="1.5" fill="#FFD700"/>
+  <circle cx="34" cy="22" r="1" fill="#FFD700"/>
+  <circle cx="30" cy="14" r="1.2" fill="#FFD700"/>
+  
+  <!-- Heart Icon (smaller, bottom right) -->
+  <path d="M28 28c0 1.5 1.2 2.7 2.7 2.7s2.7-1.2 2.7-2.7c0-.7-.3-1.4-.8-1.9-.5.5-1.2.8-1.9.8s-1.4-.3-1.9-.8c-.5.5-.8 1.2-.8 1.9z" fill="#FF69B4" opacity="0.8"/>
+  
+  <!-- Navigation Pin (smaller, bottom left) -->
+  <path d="M16 30c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2zm2-1.5c.3 0 .5.2.5.5s-.2.5-.5.5-.5-.2-.5-.5.2-.5.5-.5z" fill="#00BFFF" opacity="0.8"/>
+  
+  <defs>
+    <linearGradient id="doraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#EC4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

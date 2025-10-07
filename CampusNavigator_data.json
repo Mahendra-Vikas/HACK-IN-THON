@@ -1,0 +1,88 @@
+[{
+  "node": "Main Gate",
+  "front": "Way to Campus",
+  "back": "Kinathukadavu-kattampatti Road",
+  "left": "",
+  "right": "ATM",
+  "describe": "A main gate entrance looks like an orch and have an banner of Sri Eshwar College Of Engineering",
+  "category": "Entrance",
+  "coords": { "lat": 10.961431, "lng": 77.008519 },
+  "connections": ["Temple", "Open Air Theatre", "ATM", "Lawn Area"],
+  "floor": "",
+  "accessibility": ["walk","two wheelers","four wheelers"],
+  "landmarks_nearby": ["Open Air Theatre", "Temple","Watchman"],
+  "voice_hint": "travel along kinathukadavu-kattampatti Road to reach this College Main Gate Entrance",
+  "facing_description": "Facing the front of the Main Gate entrance."
+}
+,
+{
+  "node": "Main Block",
+  "front": "Reception/Office",
+  "back": "Elevation",
+  "left": "Exit",
+  "right": "Transport facility",
+ "describe": "The Main Block of Sri Eshwar College of Engineering serves as the central administrative and academic building. It features a large entrance canopy supported by blue pillars and a glass façade with the words 'Knowledge is Excellence' above the entrance. The area in front includes parked electric carts and cars, with a broad pathway and green lawns on both sides.",
+  "category": "Main Block",
+  "coords": { "lat": 10.961431, "lng": 77.008519 },
+  "connections": ["Elevation", "Open Air Theatre", "Transport facility"],
+  "floor": "",
+  "accessibility": "walk",
+  "landmarks_nearby": ["Open Air Theatre"],
+   "voice_hint": "You are now standing in front of the Main Block — the heart of our college. Walk straight under the big roof with blue pillars to reach the reception area. If you need help, just say, 'Guide me inside the Main Block.'",
+   "facing_description": "Facing the front entrance of the Main Block, you can see the main canopy and sliding glass doors leading into the reception and administrative offices."
+
+}
+,
+{
+  "node": "AI & ML Block",
+  "front": "AI & ML Department Entrance",
+  "back": "Pathway to Main Block",
+  "left": "Way to Amenity,Mario",
+  "right": "Way to Girls Hostel",
+  "describe": "The Artificial Intelligence and Data Science Block (CSE – AI & ML) at Sri Eshwar College of Engineering is a modern academic facility dedicated to the study and innovation of Artificial Intelligence, Machine Learning, and Data Science. The building features a contemporary architectural design with a clean glass façade and a wooden name panel above the entrance. The surrounding area includes potted plants, tiled pavements, and shaded walkways under large trees, creating a calm and inspiring environment for learning and research.",
+  "category": "Department Block",
+  "coords": { "lat": 10.961421, "lng": 77.008639 },
+  "connections": ["Mech Block"],
+  "floor": "Ground",
+  "accessibility": ["walk", "wheelchair accessible"],
+  "landmarks_nearby": ["Way to Girls Hostel", "Mech Block", "Main Block"],
+  "voice_hint": "You are now at the entrance of the Artificial Intelligence and Data Science Block — CSE (AI & ML). Step forward through the glass doors to explore classrooms, research labs, and project areas focused on AI and Machine Learning.",
+  "facing_description": "Facing the AI & ML Block entrance, you see the glass doors framed by white pillars and a wooden overhead board that reads 'ARTIFICIAL INTELLIGENCE AND DATA SCIENCE CSE (AI & ML) BLOCK'."
+}
+,
+  {
+  "node": "Amenity Centre",
+  "front": "Pathway to AI & ML Block",
+  "back": "Ground",
+  "left": ["Way to medical centre","NCC Block"],
+  "right": ["Chat Corner","Mario","Way to Boys Hostel"],
+  "describe": "The Amenity Centre at Sri Eshwar College of Engineering is a modern, multi-purpose facility designed to enhance student comfort and campus life. The building features a bold architectural style with red metallic panels, large glass windows, and silver-grey pillars that give it a professional and vibrant look. Inside, the Amenity Centre houses various student-friendly spaces such as the canteen, stationery shop, recreation area, and rest zones. The entrance includes a few steps leading up to a glass façade surrounded by greenery and palm plants, providing a refreshing atmosphere.",
+  "category": "Student Facility",
+  "coords": { "lat": 10.961415, "lng": 77.008712 },
+  "connections": ["Chat Corner","Mario","Xerox Centre","Dining"],
+  "floor": "Ground",
+  "accessibility": ["walk", "wheelchair accessible","E-Vehicle"],
+  "landmarks_nearby": ["Mario Opposite"],
+  "voice_hint": "You are now at the Amenity Centre — a vibrant spot where students relax, eat, and connect. Step up through the main glass doors to access the canteen and indoor recreation area.",
+  "facing_description": "Facing the Amenity Centre, you see a striking red and silver façade with tall glass windows and palm trees on both sides of the entrance staircase, giving the building a modern and welcoming appearance."
+}
+,
+{
+  "node": "Open Air Theatre",
+  "front": "Stage Area",
+  "back": "Lawn Area",
+  "left": "Path to Temple",
+  "right": "Lawn Area",
+  "describe": "The Open Air Theatre at Sri Eshwar College of Engineering is a serene outdoor venue designed for performances, gatherings, and student events. It features semi-circular stone seating arranged amphitheater-style, surrounded by lush greenery and trees. The rustic stone and concrete construction blends naturally with the landscape, offering a peaceful and inviting atmosphere. A vertical number sequence (3, 2, 1, 6) is visible, possibly indicating seating rows or event markers.",
+  "category": "Event Space",
+  "coords": { "lat": 10.961460, "lng": 77.008580 },
+  "connections": ["Main Block", "Temple", "Lawn Area", "Main Gate"],
+  "floor": "Ground",
+  "accessibility": ["walk", "wheelchair accessible","E-Vehicle"],
+  "landmarks_nearby": ["Main Block", "Temple", "Lawn Area"],
+  "voice_hint": "You are now at the Open Air Theatre — a tranquil space for performances and student gatherings. Walk toward the center stage or find a seat along the stone rows to enjoy the view.",
+  "facing_description": "Facing the Open Air Theatre, you see rows of stone seating curving around a central stage area, framed by trees and open sky."
+}
+
+
+]
